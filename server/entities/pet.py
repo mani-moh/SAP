@@ -28,3 +28,4 @@ class Pet():
     def __str__(self):
         return f'{self.name} (Attack:{self.attack}, Health:{self.health}, '\
                f'Tier:{self.tier}, Ability:{self.ability})'
+

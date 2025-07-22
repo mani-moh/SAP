@@ -1,4 +1,5 @@
 """Player pet class"""
+from server.entities.pet import Pet
 
 class PlayerPet:
     """
@@ -16,9 +17,12 @@ class PlayerPet:
         :type level: int
         """
 
-        self.pet = pet
+        
+        self.pet : Pet = pet
         self.xp = xp
         self.level = level
+        self.alive = True
+        self.effect = None
 
     def __str__(self):
         return f'{self.pet} (XP:{self.xp}, Level:{self.level})'
@@ -45,3 +49,15 @@ class PlayerPet:
         """
         self.xp = 0
         self.level = 1
+
+    def take_damage(self, damage:int = 1):
+        """applies damage to pet and sets if the pet is still alive"""
+        self.pet.health -= damage
+        if self.pet.health <= 0:
+            self.alive = False
+            self.pet.health = 0
+
+    def damage_amount(self) -> int:
+        """returns the damage amount"""
+        #TODO check if there is a damage modifier
+        return self.pet.attack

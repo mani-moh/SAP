@@ -4,6 +4,7 @@ from server.entities.player_pet import PlayerPet
 
 class Loadout:
     """Represents a player's loadout"""
+    index_range = (1,2,3,4,5)
     def __init__(self):
         """
         Initializes a Loadout
@@ -28,10 +29,15 @@ class Loadout:
         yield self.pet4
         yield self.pet5
 
-    def __getitem__(self, index):
-        if not 0 < index <= 5:
+    def __getitem__(self, index) -> PlayerPet:
+        if not index in self.index_range:
             raise IndexError("Index out of range")
         return getattr(self, f"pet{index}")
+
+    def __setitem__(self, index, value):
+        if not index in self.index_range:
+            raise IndexError("Index out of range")
+        setattr(self, f"pet{index}", value)
 
     def is_empty(self):
         """returns whether the loadout is empty or not"""
@@ -39,3 +45,9 @@ class Loadout:
             if pet is not None:
                 return False
         return True
+
+    def swap(self, pos1, pos2):
+        """swaps two positions on a loadout"""
+        if pos1 not in self.index_range or pos2 not in self.index_range:
+            raise IndexError("Index out of range")
+        self[pos1], self[pos2] = self[pos2], self[pos1]
