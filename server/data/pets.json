@@ -1,0 +1,54 @@
+{
+    "Mosquito": {
+        "name": "Mosquito",
+        "attack": 2,
+        "health": 2,
+        "tier": 1,
+        "ability_class": "start of battle",
+        "ability": "Deal damage to random enemy"
+    },
+    "Crab": {
+        "name": "Crab",
+        "attack": 4,
+        "health": 1,
+        "tier": 2,
+        "ability_class": "start of battle",
+        "ability": "Copy percent health from the healthiest ally"
+    },
+    "Dodo": {
+        "name": "Dodo",
+        "attack": 3,
+        "health": 2,
+        "tier": 3,
+        "ability_class": "start of battle",
+        "ability": "Give percent attack to friend ahead"
+    },
+    "Dolphin": {
+        "name": "Dolphin",
+        "attack": 4,
+        "health": 3,
+        "tier": 3,
+        "ability_class": "start of battle",
+        "ability": "Deal 4 damage to the lowest health enemy"
+    },
+    "Skunk": {
+        "name": "Skunk",
+        "attack": 3,
+        "health": 5,
+        "tier": 4,
+        "ability_class": "start of battle",
+        "ability": "Remove percent health from the healthiest enemy"
+    },
+    "Whale": {
+        "name": "Whale",
+        "attack": 3,
+        "health": 7,
+        "tier": 4,
+        "ability_class": "start of battle",
+        "ability": "Swallow friend ahead and release it on faint",
+        "secondary_abilities": [{
+            "ability_class": "faint",
+            "ability": "Release swallowed friend"
+        }]
+    }
+}

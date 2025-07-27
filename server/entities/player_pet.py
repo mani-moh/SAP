@@ -1,4 +1,5 @@
 """Player pet class"""
+from __future__ import annotations
 from server.entities.pet import Pet
 
 class PlayerPet:
@@ -22,7 +23,6 @@ class PlayerPet:
         self.xp = xp
         self.level = level
         self.alive = True
-        self.effect = None
 
     def __str__(self):
         return f'{self.pet} (XP:{self.xp}, Level:{self.level})'
@@ -56,6 +56,20 @@ class PlayerPet:
         if self.pet.health <= 0:
             self.alive = False
             self.pet.health = 0
+    
+    def heal(self, healing:int = 1):
+        """heals the pet"""
+        self.pet.health += healing
+
+    def set_health(self, health:int = 1):
+        """sets the pet's health"""
+        self.pet.health = health
+        if self.pet.health <= 0:
+            self.alive = False
+
+    def swallow(self, player_pet:PlayerPet):
+        """swallows a pet"""
+        self.pet.swallowed = player_pet.pet.name
 
     def damage_amount(self) -> int:
         """returns the damage amount"""

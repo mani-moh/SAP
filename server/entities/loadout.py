@@ -51,3 +51,43 @@ class Loadout:
         if pos1 not in self.index_range or pos2 not in self.index_range:
             raise IndexError("Index out of range")
         self[pos1], self[pos2] = self[pos2], self[pos1]
+
+    def pet_indices(self):
+        """returns the indices loadout that are not empty"""
+        return [i for i in self.index_range if self[i] is not None]
+
+    def healthiest_pet(self) -> PlayerPet:
+        """returns the healthiest pet in the loadout as PlayerPet"""
+        healthiest_ally = None
+        for player_pet in self:
+            if player_pet is not None and (healthiest_ally is None or player_pet.pet.health > healthiest_ally.pet.health):
+                healthiest_ally = player_pet
+        return healthiest_ally
+
+    def weakest_pet(self) -> PlayerPet:
+        """returns the weakest pet in the loadout as PlayerPet"""
+        weakest_ally = None
+        for player_pet in self:
+            if player_pet is not None and (weakest_ally is None or player_pet.pet.health < weakest_ally.pet.health):
+                weakest_ally = player_pet
+        return weakest_ally
+
+    def pet_index(self, player_pet:PlayerPet):
+        """returns the index of the player pet in the loadout or None if not found"""
+        for i in self.index_range:
+            if self[i] is player_pet:
+                return i
+
+    def friend_ahead(self, player_pet:PlayerPet):
+        """returns the player pet that is ahead of the player pet in the loadout or None if not found"""
+        index = self.pet_index(player_pet)
+        if index is None:
+            return None
+        if index == 1:
+            return None
+        index -= 1
+        while index in self.index_range:
+            if self[index] is not None:
+                return self[index]
+            index -= 1
+        return None
