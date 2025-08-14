@@ -1,11 +1,12 @@
 """loadout class"""
 
-from server.entities.player_pet import PlayerPet
+from entities.player_pet import PlayerPet
+from entities.pet import Pet
 
 class Loadout:
     """Represents a player's loadout"""
     index_range = (1,2,3,4,5)
-    def __init__(self):
+    def __init__(self, index:int):
         """
         Initializes a Loadout
 
@@ -16,6 +17,7 @@ class Loadout:
         :param pet3: player pet 3
         :type pet3: PlayerPet
         """
+        self.index:int = index
         self.pet1: PlayerPet = None
         self.pet2: PlayerPet = None
         self.pet3: PlayerPet = None
@@ -38,6 +40,12 @@ class Loadout:
         if not index in self.index_range:
             raise IndexError("Index out of range")
         setattr(self, f"pet{index}", value)
+
+    def __str__(self):
+        pets = ""
+        for pet in self:
+            pets += f" {pet},"
+        return pets
 
     def is_empty(self):
         """returns whether the loadout is empty or not"""
@@ -91,3 +99,21 @@ class Loadout:
                 return self[index]
             index -= 1
         return None
+
+    def summon(self, player_pet, position):
+        empty_count = 0
+        for pet in self:
+            if pet is None:
+                empty_count +=1
+        if empty_count == 0:
+            return False
+        elif self[position].alive == False or self[position] is None:
+            self[position] = player_pet
+            return True
+        else:
+            return False
+
+    def summon_exact(self, name, attack, health, tier, ability_class, ability, secondary_abilities, xp, level, position):
+        pet = Pet(name, attack, health, tier, ability_class, ability, secondary_abilities)
+        player_pet = PlayerPet(pet, xp, level)
+        return self.summon(player_pet, position)

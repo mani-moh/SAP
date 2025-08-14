@@ -1,6 +1,6 @@
 """Player pet class"""
 from __future__ import annotations
-from server.entities.pet import Pet
+from entities.pet import Pet
 
 class PlayerPet:
     """
@@ -66,10 +66,6 @@ class PlayerPet:
         self.pet.health = health
         if self.pet.health <= 0:
             self.alive = False
-
-    def swallow(self, player_pet:PlayerPet):
-        """swallows a pet"""
-        self.pet.swallowed = player_pet.pet.name
 
     def damage_amount(self) -> int:
         """returns the damage amount"""

@@ -1,70 +1,59 @@
+# client.py
+import asyncio
+import websockets
+import json
 import pygame
-import socket
-import threading
-import random
 
-HOST = '127.0.0.1'
-PORT = 65432
+# Pygame setup
+pygame.init()
+screen = pygame.display.set_mode((400, 300))
+pygame.display.set_caption("SAP Clone Test")
 
-WIDTH, HEIGHT = 800, 600
-BALL_RADIUS = 15
+state = {"gold": 10, "pets": []}
 
-# Ball class
-class Ball:
-    def __init__(self):
-        self.x = random.randint(BALL_RADIUS, WIDTH - BALL_RADIUS)
-        self.y = random.randint(BALL_RADIUS, HEIGHT - BALL_RADIUS)
-        self.dx = random.choice([-5, 5])
-        self.dy = random.choice([-5, 5])
-        self.color = (random.randint(50, 255), random.randint(50, 255), random.randint(50, 255))
+async def game_client():
+    global state
+    async with websockets.connect("ws://localhost:8765") as websocket:
 
-    def move(self):
-        self.x += self.dx
-        self.y += self.dy
-        if self.x < BALL_RADIUS or self.x > WIDTH - BALL_RADIUS:
-            self.dx *= -1
-        if self.y < BALL_RADIUS or self.y > HEIGHT - BALL_RADIUS:
-            self.dy *= -1
+        async def sender():
+            while True:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        exit()
 
-    def draw(self, screen):
-        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), BALL_RADIUS)
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_b:  # Press B to buy pet
+                            await websocket.send(json.dumps({
+                                "action": "buy_pet"
+                            }))
+                        elif event.key == pygame.K_SPACE:  # Space = start battle
+                            await websocket.send(json.dumps({
+                                "action": "start_battle"
+                            }))
 
-# Pygame and network setup
-balls = []
+                # Render
+                screen.fill((0, 0, 0))
+                font = pygame.font.SysFont(None, 30)
+                text = font.render(f"Gold: {state['gold']}", True, (255, 255, 255))
+                screen.blit(text, (20, 20))
+                pygame.display.flip()
 
-def network_listener(sock):
-    while True:
-        try:
-            data = sock.recv(1024)
-            if data.decode() == "ADD_BALL":
-                balls.append(Ball())
-        except:
-            break
+                await asyncio.sleep(0.016)  # ~60 FPS
 
-def main():
-    pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    clock = pygame.time.Clock()
+        async def receiver():
+            while True:
+                message = await websocket.recv()
+                data = json.loads(message)
 
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((HOST, PORT))
-        threading.Thread(target=network_listener, args=(s,), daemon=True).start()
+                if data["event"] == "state_update":
+                    state = data["state"]
 
-        running = True
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
+                elif data["event"] == "battle_result":
+                    print("Battle log:", data["log"])
+                    print("Winner:", data["winner"])
 
-            screen.fill((30, 30, 30))
-            for ball in balls:
-                ball.move()
-                ball.draw(screen)
-
-            pygame.display.flip()
-            clock.tick(60)
-
-    pygame.quit()
+        await asyncio.gather(sender(), receiver())
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(game_client())

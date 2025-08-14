@@ -13,7 +13,8 @@
         "health": 1,
         "tier": 2,
         "ability_class": "start of battle",
-        "ability": "Copy percent health from the healthiest ally"
+        "ability": "Copy percent health from the healthiest ally",
+        "description": "50%, 100%, 150%"
     },
     "Dodo": {
         "name": "Dodo",
@@ -21,8 +22,10 @@
         "health": 2,
         "tier": 3,
         "ability_class": "start of battle",
-        "ability": "Give percent attack to friend ahead"
+        "ability": "Give percent attack to friend ahead",
+        "description": "50%, 100%, 150%"
     },
+    
     "Dolphin": {
         "name": "Dolphin",
         "attack": 4,
@@ -37,7 +40,8 @@
         "health": 5,
         "tier": 4,
         "ability_class": "start of battle",
-        "ability": "Remove percent health from the healthiest enemy"
+        "ability": "Remove percent health from the healthiest enemy",
+        "description": "33%, 66%, 99%"
     },
     "Whale": {
         "name": "Whale",
@@ -49,6 +53,7 @@
         "secondary_abilities": [{
             "ability_class": "faint",
             "ability": "Release swallowed friend"
-        }]
+        }],
+        "description": "level: 1, 2, 3"
     }
 }

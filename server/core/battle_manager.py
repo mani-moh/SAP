@@ -1,10 +1,9 @@
 """battle manager class"""
 import copy
-from server.entities.battle_result import BattleResult
-from server.entities.loadout import Loadout
-from server.entities.player_pet import PlayerPet
-from server.core.event_manager import EventManager
-from server.entities.effects import effect_lookup
+from entities.battle_result import BattleResult
+from entities.loadout import Loadout
+from entities.player_pet import PlayerPet
+from core.event_manager import EventManager
 
 class BattleManager:
     """ manages the battle between two loadouts"""
@@ -17,6 +16,7 @@ class BattleManager:
         self.battle_loadout2 : Loadout = copy.deepcopy(self.player2.loadout)
         self.loadouts = [self.battle_loadout1, self.battle_loadout2]
         self.event_manager = EventManager(self)
+        self.log = []
         for loadout in self.loadouts:
             for player_pet in loadout:
                 if player_pet is not None:
@@ -27,15 +27,17 @@ class BattleManager:
 
     def battle(self) -> BattleResult:
         """starts the battle and returns the battle result"""
+        self.log.append({"type":"start battle"})
         self.event_manager.post("start of battle")
+        print(f"loadout1:{self.battle_loadout1}")
+        print(f"loadout2:{self.battle_loadout2}\n")
         self.resolve_deaths()
         while not self.is_battle_over():
             self.push_forward()
-            self.before_attack_abilities()
+            print(f"loadout1:{self.battle_loadout1}")
+            print(f"loadout2:{self.battle_loadout2}\n")
             self.attack_phase()
-            self.after_attck_abilities()
             self.resolve_deaths()
-            
         return self.resolve_winner()
 
     def is_battle_over(self):
@@ -47,50 +49,61 @@ class BattleManager:
     def push_forward(self):
         """pushes all the pets to the front"""
         for loadout in self.loadouts:
-            for i, player_pet in enumerate(loadout):
+            for i, _ in enumerate(loadout):
                 if i > 0:
                     current_pos = i + 1
-                    while loadout[current_pos-1] is None:
-                        loadout.swap(current_pos, current_pos - 1)
+                    if loadout[current_pos] is not None:
+                        while loadout[current_pos-1] is None:
+                            loadout.swap(current_pos, current_pos - 1)
+                            self.log.append({"type":"swap", "loadout":loadout.index, "pos1":current_pos, "pos2":current_pos-1})
 
     def attack_phase(self):
         """plays the attack phase of the battle"""
-        self.battle_loadout1[1].take_damage(self.battle_loadout2[1].damage_amount())
-        self.battle_loadout2[1].take_damage(self.battle_loadout1[1].damage_amount())
+        damage_amount1 = self.battle_loadout1[1].damage_amount()
+        damage_amount2 = self.battle_loadout2[1].damage_amount()
+        self.battle_loadout1[1].take_damage(damage_amount2)
+        self.battle_loadout2[1].take_damage(damage_amount1)
+        self.log.append({"type":"attack", "pet1 damaged":damage_amount2, "pet2 damaged":damage_amount1})
 
     def resolve_deaths(self):
         """resolves the deaths of the battle"""
-        for loadout in self.loadouts:
+        for j, loadout in enumerate(self.loadouts):
             for i, player_pet in enumerate(loadout):
                 if player_pet is not None and not player_pet.alive:
+                    self.log.append({"type":"faint", "loadout":j+1, "pos":i+1, "name":player_pet.pet.name})
                     self.event_manager.post("faint", player_pet=player_pet)
-                    loadout[i] = None
+                    for k,p_pet in enumerate(loadout):
+                        if p_pet is player_pet:
+                            loadout[k+1] = None
 
-    def start_of_battle_abilities(self):
-        """resolves the start of battle abilities of the battle"""
-        #TODO implement start of battle abilities
+    # def start_of_battle_abilities(self):
+    #     """resolves the start of battle abilities of the battle"""
+    #     # implement start of battle abilities
 
-    def before_attack_abilities(self):
-        """resolves the before attack abilities of the battle"""
-        #TODO implement before attack abilities
+    # def before_attack_abilities(self):
+    #     """resolves the before attack abilities of the battle"""
+    #     # implement before attack abilities
 
-    def after_attck_abilities(self):
-        """resolves the after attack abilities of the battle"""
-        #TODO implement after attack abilities
+    # def after_attck_abilities(self):
+    #     """resolves the after attack abilities of the battle"""
+    #     # implement after attack abilities
 
-    def faint_abilities(self):
-        """resolves the after death abilities of the battle"""
-        #TODO implement after death abilities
+    # def faint_abilities(self):
+    #     """resolves the after death abilities of the battle"""
+    #     # implement after death abilities
 
     def resolve_winner(self):
         """resolves the winner of the battle and returns a battle_result"""
         if self.battle_loadout1.is_empty():
             if self.battle_loadout2.is_empty():
-                return BattleResult(True)
+                self.log.append({"type":"battle over", "winner":"draw"})
+                return BattleResult(is_draw=True, log=self.log)
             else:
-                return BattleResult(False, self.player2, self.player1)
+                self.log.append({"type":"battle over", "winner":2})
+                return BattleResult(is_draw=False, winner=self.player2, loser=self.player1, log = self.log)
         elif self.battle_loadout2.is_empty():
-            return BattleResult(False, self.player1, self.player2)
+            self.log.append({"type":"battle over", "winner":1})
+            return BattleResult(is_draw=False, winner=self.player1, loser=self.player2, log = self.log)
 
     def which_loadout(self, player_pet:PlayerPet) -> Loadout:
         """returns the loadout of the player pet"""
@@ -101,11 +114,4 @@ class BattleManager:
         else:
             return None
 
-class BattleEffectInfo:
-    """stores information about a battle effect"""
-    def __init__(self, battle_manager:BattleManager, pet_loadout:Loadout, effect_pet:PlayerPet):
-        self.battle_manager = battle_manager
-        self.pet_loadout = pet_loadout
-        self.enemy_loadout = self.battle_manager.loadouts[1] if self.battle_manager.loadouts[0] is pet_loadout else self.battle_manager.loadouts[0]
-        self.effect_pet = effect_pet
-        self.effect_str = self.effect_pet.pet.ability
+

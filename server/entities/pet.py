@@ -1,5 +1,5 @@
 """pet class"""
-from server.entities.effects import effect_lookup
+from entities.effects import effect_lookup
 
 class Pet():
     """
@@ -27,10 +27,16 @@ class Pet():
         self.ability_class:str = ability_class
         self.ability:str = ability  # Ability name
         self.ability_func = effect_lookup[self.ability] #the function itself
-        self.secondary_abilities = seconadry_abilities
+        self.secondary_abilities = [{"ability_class":ability_set["ability_class"], "ability":effect_lookup[ability_set["ability"]]} for ability_set in seconadry_abilities]
         self.swallowed:str = None
 
     def __str__(self):
         return f'{self.name} (Attack:{self.attack}, Health:{self.health}, '\
-               f'Tier:{self.tier}, Ability:{self.ability})'
+            #    f'Tier:{self.tier}, Ability:{self.ability})'
 
+    def swallow(self, player_pet):
+        """swallows a pet"""
+        self.swallowed = player_pet.pet.name
+
+    def release_swallowed_pet(self):
+        self.swallowed = None

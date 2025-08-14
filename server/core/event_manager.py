@@ -1,10 +1,10 @@
 """event manager class"""
-from server.entities.player_pet import PlayerPet
-from server.core.battle_manager import BattleEffectInfo, BattleManager
+from entities.player_pet import PlayerPet
+from entities.battle_effect_info import BattleEffectInfo
 
 class EventManager:
     """Manages the event"""
-    def __init__(self, battle_manager:BattleManager):
+    def __init__(self, battle_manager):
         self.listeners = {}
         self.battle_manager = battle_manager
 
@@ -19,5 +19,7 @@ class EventManager:
         """Posts an event"""
         if event_type in self.listeners:
             for event in self.listeners[event_type]:
+                print(f"loadout1:{self.battle_manager.battle_loadout1}")
+                print(f"loadout2:{self.battle_manager.battle_loadout2}\n")
                 info = BattleEffectInfo(self.battle_manager, self.battle_manager.which_loadout(event["player_pet"]), event["player_pet"])
                 event["callback"](info, **kwargs)
