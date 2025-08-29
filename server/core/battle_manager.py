@@ -1,22 +1,28 @@
 """battle manager class"""
+from __future__ import annotations
 import copy
 from entities.battle_result import BattleResult
 from entities.loadout import Loadout
 from entities.player_pet import PlayerPet
 from core.event_manager import EventManager
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from board.player import Player
+
 class BattleManager:
     """ manages the battle between two loadouts"""
     start_of_battle_classes = ("start of battle",)
     before_attack_classes = ("before attack",)
     def __init__(self, player1, player2):
-        self.player1 = player1
-        self.player2 = player2
+        self.player1: Player = player1
+        self.player2: Player = player2
         self.battle_loadout1 : Loadout = copy.deepcopy(self.player1.loadout)
         self.battle_loadout2 : Loadout = copy.deepcopy(self.player2.loadout)
         self.loadouts = [self.battle_loadout1, self.battle_loadout2]
-        self.event_manager = EventManager(self)
         self.log = []
+        self.event_manager = EventManager(self)
+        
         for loadout in self.loadouts:
             for player_pet in loadout:
                 if player_pet is not None:

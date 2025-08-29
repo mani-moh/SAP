@@ -1,9 +1,11 @@
 """shop pet class"""
+import config
+import json
 class ShopPet:
     """
     Represents a pet that is in the shop
     """
-    def __init__(self, pet, price, frozen=False):
+    def __init__(self, pet, frozen=False):
         """
         Initializes a ShopPet
         :param pet: pet that is being sold
@@ -14,11 +16,13 @@ class ShopPet:
         :type frozen: bool
         """
         self.pet = pet
-        self.price = price
+        self.price = config.default_pet_price
         self.frozen = frozen
 
     def __str__(self):
-        return f'{self.pet} (Price:{self.price}, Frozen:{self.frozen})'
+        info = {"pet info":str(self.pet), "price":self.price, "frozen":self.frozen}
+        result = json.dumps(info)
+        return result
 
     def freeze_toggle(self):
         """Freezes the pet so it won't be rerolled"""

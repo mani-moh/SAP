@@ -1,5 +1,6 @@
 """pet class"""
 from entities.effects import effect_lookup
+import json
 
 class Pet():
     """
@@ -27,12 +28,14 @@ class Pet():
         self.ability_class:str = ability_class
         self.ability:str = ability  # Ability name
         self.ability_func = effect_lookup[self.ability] #the function itself
+        self.secondary_abilities_text = seconadry_abilities
         self.secondary_abilities = [{"ability_class":ability_set["ability_class"], "ability":effect_lookup[ability_set["ability"]]} for ability_set in seconadry_abilities]
         self.swallowed:str = None
 
     def __str__(self):
-        return f'{self.name} (Attack:{self.attack}, Health:{self.health}, '\
-            #    f'Tier:{self.tier}, Ability:{self.ability})'
+        info = {"name":self.name, "attack":self.attack, "health":self.health, "tier":self.tier, "ability":self.ability, "secondary_abilities":self.secondary_abilities_text}
+        result = json.dumps(info)
+        return result
 
     def swallow(self, player_pet):
         """swallows a pet"""

@@ -1,5 +1,6 @@
 """Player pet class"""
 from __future__ import annotations
+import json
 from entities.pet import Pet
 
 class PlayerPet:
@@ -7,25 +8,15 @@ class PlayerPet:
     Represents a pet in a player's loadout
     """
     def __init__(self, pet, xp=0, level = 1):
-        """
-        Initializes a PlayerPet
-
-        :param pet: the pet object associated with the player
-        :type pet: pet.Pet
-        :param xp: experience points of the player pet (default is 0)
-        :type xp: int
-        :param level: level of the player pet (default is 1)
-        :type level: int
-        """
-
-        
         self.pet : Pet = pet
         self.xp = xp
         self.level = level
         self.alive = True
 
     def __str__(self):
-        return f'{self.pet} (XP:{self.xp}, Level:{self.level})'
+        info = {"pet info":str(self.pet), "xp":self.xp, "level":self.level}
+        result = json.dumps(info)
+        return result
 
     def add_xp(self, xp):
         """

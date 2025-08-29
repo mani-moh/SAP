@@ -11,8 +11,5 @@ class BattleResult:
 
     def __str__(self):
         log_str = "\n".join([f"{i}: {str(event)}" for i,event in enumerate(self.log)])
-        result = f"""
-winner:{self.winner}
-log:{log_str}
-"""
-        return result
+        result = {f"winner":f"{self.winner}", "log":f"{log_str}"}
+        return str(result)
