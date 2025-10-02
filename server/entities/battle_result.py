@@ -13,3 +13,5 @@ class BattleResult:
         log_str = "\n".join([f"{i}: {str(event)}" for i,event in enumerate(self.log)])
         result = {f"winner":f"{self.winner}", "log":f"{log_str}"}
         return str(result)
+    def to_dict(self):
+        return {"is_draw":self.is_draw, "winner":self.winner.index if self.winner is not None else None, "loser":self.loser.index if self.loser is not None else None, "log":self.log}

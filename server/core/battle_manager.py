@@ -35,13 +35,13 @@ class BattleManager:
         """starts the battle and returns the battle result"""
         self.log.append({"type":"start battle"})
         self.event_manager.post("start of battle")
-        print(f"loadout1:{self.battle_loadout1}")
-        print(f"loadout2:{self.battle_loadout2}\n")
+        print(f"loadout1:{self.battle_loadout1.to_dict()}")
+        print(f"loadout2:{self.battle_loadout2.to_dict()}\n")
         self.resolve_deaths()
         while not self.is_battle_over():
             self.push_forward()
-            print(f"loadout1:{self.battle_loadout1}")
-            print(f"loadout2:{self.battle_loadout2}\n")
+            print(f"loadout1:{self.battle_loadout1.to_dict()}")
+            print(f"loadout2:{self.battle_loadout2.to_dict()}\n")
             self.attack_phase()
             self.resolve_deaths()
         return self.resolve_winner()
@@ -56,12 +56,14 @@ class BattleManager:
         """pushes all the pets to the front"""
         for loadout in self.loadouts:
             for i, _ in enumerate(loadout):
+                i += 1
                 if i > 0:
                     current_pos = i + 1
-                    if loadout[current_pos] is not None:
-                        while loadout[current_pos-1] is None:
+                    if current_pos < 6 and loadout[current_pos] is not None:
+                        while current_pos > 1 and loadout[current_pos-1] is None:
                             loadout.swap(current_pos, current_pos - 1)
                             self.log.append({"type":"swap", "loadout":loadout.index, "pos1":current_pos, "pos2":current_pos-1})
+                            current_pos -= 1
 
     def attack_phase(self):
         """plays the attack phase of the battle"""

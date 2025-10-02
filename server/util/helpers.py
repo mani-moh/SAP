@@ -27,4 +27,31 @@ def create_random_shop_pet_from_json(max_tier):
             secondary_abilities.append(ability)
     pet = ShopPet(Pet(pet_data["name"], pet_data["attack"], pet_data["health"], pet_data["tier"], pet_data["ability_class"], pet_data["ability"], secondary_abilities))
     return pet
-    
+
+def get_last_id(dictionary:dict):
+    id = 0
+    for key in dictionary:
+        if key > id:
+            id = key + 1
+    return id
+def recursive_json_loads(obj):
+    if isinstance(obj, str):
+        try:
+            # Try parsing as JSON
+            loaded = json.loads(obj)
+            # If successful, recurse again
+            return recursive_json_loads(loaded)
+        except (json.JSONDecodeError, TypeError):
+            # Not valid JSON -> leave as string
+            return obj
+    elif isinstance(obj, dict):
+        return {k: recursive_json_loads(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [recursive_json_loads(item) for item in obj]
+    else:
+        return obj
+class MyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if hasattr(obj, "to_dict"):
+            return obj.to_dict()
+        return super().default(obj)

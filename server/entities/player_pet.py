@@ -23,6 +23,8 @@ class PlayerPet:
         adds xp to the player pet
         """
         new_xp = self.xp + xp
+        self.pet.health += xp
+        self.pet.attack += xp
         if new_xp in (0,1,2,3,4,5):
             if new_xp in (0, 1):
                 self.level = 1
@@ -62,3 +64,6 @@ class PlayerPet:
         """returns the damage amount"""
         #TODO check if there is a damage modifier
         return self.pet.attack
+
+    def to_dict(self):
+        return {"pet":self.pet.to_dict(), "xp":self.xp, "level":self.level}

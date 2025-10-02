@@ -1,0 +1,17 @@
+{
+    "type": "battle_result",
+    "result": {
+        "is_draw": false,
+        "winner": 1,
+        "loser": 2,
+        "log": [
+            {
+                "type": "start battle"
+            },
+            {
+                "type": "battle over",
+                "winner": 1
+            }
+        ]
+    }
+}

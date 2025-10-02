@@ -9,14 +9,17 @@
 import asyncio
 import json
 from queue import Queue
+import util.helpers as helpers
 from config import HOST, PORT
 from core.client import Client
 from core.versus_game_manager import VersusGameManager
+from entities.player_pet import PlayerPet
 class Server:
     def __init__(self):
         self.HOST = HOST
         self.PORT = PORT
         self.clients: list[Client] = []
+        self.versus_game_managers: dict[int, VersusGameManager] = {}
         self.versus_queue = Queue()
         self.games: list[VersusGameManager] = []
         self.last_id = 0
@@ -51,11 +54,11 @@ class Server:
     async def message_sender(self, client: Client):
         while True:
             msg = await client.sender_queue.get()
-            final = json.dumps(msg) + "\n"
+            final = json.dumps(msg, cls=helpers.MyEncoder) + "\n"
             client.writer.write(final.encode())
             await client.writer.drain()
             client.sender_queue.task_done()
-            print(f"msg sent:{msg}")
+            print(f"msg sent:{final}")
 
     async def receive_messages(self, client:Client):
         try:
@@ -86,13 +89,50 @@ class Server:
             case "change name":
                 client.name = message["name"]
                 print(f"Player {client.id} changed name to {client.name}.")
+            case "versus match":
+                game_id = message["game id"]
+
             case "reroll":
                 client.player.shop.reroll()
-                client.send_message({"type": "shop_update", "shop": str(client.player.shop), "round": client.player.game_manager.round})
+                client.player.coins -= 1
+                # client.send_message({"type": "shop_update", "shop": client.player.shop, "loadout":client.player.loadout, "round": client.player.game_manager.round})
+                client.send_message({"type": "shop_update", "shop": client.player.shop, "loadout":client.player.loadout, "round": client.player.game_manager.round, "lives": client.player.lives, "enemy lives": client.player.game_manager.player1.lives if client.player is client.player.game_manager.player1 else client.player.game_manager.player2.lives, "coins": client.player.coins})
             case "ready":
                 client.go_to_battle_phase = not client.go_to_battle_phase
+                client.player.game_manager.round_manager.event_manager.post("end turn")
+            case "freeze":
                 
-
+                game = self.versus_game_managers[message["game id"]]
+                if client is game.client1 or client is game.client2:
+                    client.player.shop.shop_pets[message["pos"]].freeze_toggle()
+                    client.send_message({"type": "shop_update", "shop": client.player.shop, "loadout":client.player.loadout, "round": client.player.game_manager.round, "lives": client.player.lives, "enemy lives": client.player.game_manager.player1.lives if client.player is client.player.game_manager.player1 else client.player.game_manager.player2.lives, "coins": client.player.coins})
+            case "buy pet":
+                shop_index = message["shop index"]
+                pos = message["pos"]
+                shop_pet = client.player.shop.shop_pets[shop_index]
+                pet = client.player.loadout[pos]
+                client.player.coins -= shop_pet.price
+                if pet is not None and shop_pet.pet.name == pet.pet.name:
+                    pet.add_xp(1)
+                    client.player.shop.shop_pets.pop(shop_index)
+                if pet is None:
+                    player_pet = PlayerPet(shop_pet.pet)
+                    client.player.loadout[pos] = player_pet
+                    func = player_pet.pet.ability_func
+                    client.player.game_manager.round_manager.event_manager.subscribe(player_pet.pet.ability_class, func, player_pet)
+                    for ability in player_pet.pet.secondary_abilities:
+                        client.player.game_manager.round_manager.event_manager.subscribe(ability["ability_class"], ability["ability"], player_pet)
+                    client.player.shop.shop_pets.pop(shop_index)
+                    client.player.game_manager.round_manager.event_manager.post("buy", player_pet=player_pet)
+                
+                client.send_message({"type": "shop_update", "shop": client.player.shop, "loadout":client.player.loadout, "round": client.player.game_manager.round, "lives": client.player.lives, "enemy lives": client.player.game_manager.player1.lives if client.player is client.player.game_manager.player1 else client.player.game_manager.player2.lives, "coins": client.player.coins})
+            case "sell":
+                pos = message["pos"]
+                player_pet = client.player.loadout[pos]
+                client.player.coins += player_pet.level
+                client.player.game_manager.round_manager.event_manager.post("sell", player_pet=player_pet) 
+                client.player.loadout[pos] = None
+                client.send_message({"type": "shop_update", "shop": client.player.shop, "loadout":client.player.loadout, "round": client.player.game_manager.round, "lives": client.player.lives, "enemy lives": client.player.game_manager.player1.lives if client.player is client.player.game_manager.player1 else client.player.game_manager.player2.lives, "coins": client.player.coins})
 
     async def send_messages(self, message:dict, clients:list[Client]):
         for client in clients:
@@ -107,9 +147,12 @@ class Server:
         if self.versus_queue.qsize() >= 2:
             client1 = self.versus_queue.get()
             client2 = self.versus_queue.get()
-            versus_game_manager = VersusGameManager(client1, client2, self)
+            game_id = helpers.get_last_id(self.versus_game_managers)
+            versus_game_manager = VersusGameManager(client1, client2, game_id, self)
+            self.versus_game_managers[game_id] = versus_game_manager
             await versus_game_manager.start_game()
-            await self.send_messages([client1, client2], {"type":"event", "event": "start versus"})
+
+
 async def main():
     server = Server()
     await server.run()

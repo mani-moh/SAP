@@ -1,5 +1,5 @@
 """loadout class"""
-
+import json
 from entities.player_pet import PlayerPet
 from entities.pet import Pet
 
@@ -42,10 +42,11 @@ class Loadout:
         setattr(self, f"pet{index}", value)
 
     def __str__(self):
-        pets = ""
+        pets = []
         for pet in self:
-            pets += f" {pet},"
-        return pets
+            pets.append(str(pet))
+        return json.dumps(pets)
+        
 
     def is_empty(self):
         """returns whether the loadout is empty or not"""
@@ -117,3 +118,6 @@ class Loadout:
         pet = Pet(name, attack, health, tier, ability_class, ability, secondary_abilities)
         player_pet = PlayerPet(pet, xp, level)
         return self.summon(player_pet, position)
+    
+    def to_dict(self):
+        return {"index":self.index, "pet1":self.pet1.to_dict() if self.pet1 is not None else None, "pet2":self.pet2.to_dict() if self.pet2 is not None else None, "pet3":self.pet3.to_dict() if self.pet3 is not None else None, "pet4":self.pet4.to_dict() if self.pet4 is not None else None, "pet5":self.pet5.to_dict() if self.pet5 is not None else None}

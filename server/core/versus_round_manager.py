@@ -34,6 +34,8 @@ class RoundManager:
 
     async def play_round(self):
         """plays a round of the game"""
+        self.player1.coins = 10
+        self.player2.coins = 10
         await self.shop_phase()
         self.battle_phase()
         self.next_round()
@@ -50,9 +52,9 @@ class RoundManager:
                         self.event_manager.subscribe(ability["ability_class"], ability["ability"], player_pet)
         self.player1.shop.reroll()
         self.player2.shop.reroll()
-        self.client1.send_message({"type": "shop_update", "shop": str(self.player1.shop), "round": self.versus_game_manager.round})
-        self.client2.send_message({"type": "shop_update", "shop": str(self.player2.shop), "round": self.versus_game_manager.round})
-        print("waiting for ready")
+        self.event_manager.post("start of turn")
+        self.client1.send_message({"type": "shop_update", "shop": self.player1.shop, "loadout":self.player1.loadout, "round": self.versus_game_manager.round, "lives": self.player1.lives, "enemy lives": self.player2.lives, "coins": self.player1.coins})
+        self.client2.send_message({"type": "shop_update", "shop": self.player2.shop, "loadout":self.player2.loadout, "round": self.versus_game_manager.round, "lives": self.player2.lives, "enemy lives": self.player1.lives, "coins": self.player2.coins})
         while not self.client1.go_to_battle_phase or not self.client2.go_to_battle_phase:
             await asyncio.sleep(0.5)
 
@@ -65,8 +67,12 @@ class RoundManager:
 
     def process_results(self, result:BattleResult):
         """processes the results of the battle phase"""
-        self.client1.send_message({"type": "battle_result", "result": str(result)})
-        self.client2.send_message({"type": "battle_result", "result": str(result)})
+        if result.loser:
+            result.loser.lives -= 1
+        self.versus_game_manager.last_loser = result.loser
+        self.versus_game_manager.last_winner = result.winner
+        self.client1.send_message({"type": "battle_result", "result": result})
+        self.client2.send_message({"type": "battle_result", "result": result})
 
     def next_round(self):
         self.versus_game_manager.round += 1

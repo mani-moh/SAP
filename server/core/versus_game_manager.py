@@ -16,16 +16,20 @@ class VersusGameManager:
     """Manages a versus game session"""
     # Host = 'localhost'
     # PORT = 5000
-    def __init__(self, client1, client2, server:Server):
+    def __init__(self, client1, client2, game_id, server:Server):
         # self.Host = Host
         # self.PORT = PORT
         # self.clients = []
+        self.game_id = game_id
         self.game_in_progress = False
         self.server: Server = server
         self.client1: Client = client1
         self.client2: Client = client2
         self.player1: Player = None
         self.player2: Player = None
+        self.id = None
+        self.last_winner = None
+        self.last_loser = None
         
         self.loadouts: list[Loadout] = []
         self.winner = None
@@ -103,21 +107,27 @@ class VersusGameManager:
         self.loadouts = [self.player1.loadout, self.player2.loadout]
         self.client1.player = self.player1
         self.client2.player = self.player2
-        round_manager = RoundManager(self.client1, self.client2, self)
-        self.client1.send_message({"type": "start game", "index": 1})
-        self.client2.send_message({"type": "start game", "index": 2})
+        self.round_manager = RoundManager(self.client1, self.client2, self)
+        self.client1.send_message({"type": "start versus match", "index": 1, "game id":self.game_id})
+        self.client2.send_message({"type": "start versus match", "index": 2, "game id":self.game_id})
 
         await asyncio.sleep(0.5)
         while not self.is_game_over():
             print("starting round")
-            await round_manager.play_round()
+            await self.round_manager.play_round()
+
+        await self.send_messages({"type": "end versus match", "winner": self.winner.index, "loser": self.loser.index}, [self.client1, self.client2])
+        self.client1.player = None
+        self.client2.player = None
 
     def is_game_over(self):
         if self.player1.lives <= 0:
             self.winner = self.player2
+            self.loser = self.player1
             return True
         elif self.player2.lives <= 0:
             self.winner = self.player1
+            self.loser = self.player2
             return True
         return False
 

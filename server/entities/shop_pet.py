@@ -44,3 +44,6 @@ class ShopPet:
         #TODO implement buying
         """Executes the purchase of the pet, applying any necessary effects or changes."""
         self.unfreeze()
+
+    def to_dict(self):
+        return {"pet":self.pet.to_dict(), "price":self.price, "frozen":self.frozen}

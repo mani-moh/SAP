@@ -43,3 +43,5 @@ class Pet():
 
     def release_swallowed_pet(self):
         self.swallowed = None
+    def to_dict(self):
+        return {"name":self.name, "attack":self.attack, "health":self.health, "tier":self.tier, "ability_class":self.ability_class, "ability":self.ability, "secondary_abilities":self.secondary_abilities_text}

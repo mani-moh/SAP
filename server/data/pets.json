@@ -55,5 +55,68 @@
             "ability": "Release swallowed friend"
         }],
         "description": "level: 1, 2, 3"
+    },
+    "Duck": {
+        "name": "Duck",
+        "attack": 2,
+        "health": 3,
+        "tier": 1,
+        "ability_class": "sell",
+        "ability": "Give shop pets x health",
+        "description": "level: 1, 2, 3"
+    },
+    "Beaver": {
+        "name": "Beaver",
+        "attack": 3,
+        "health": 2,
+        "tier": 1,
+        "ability_class": "buy",
+        "ability": "Give two random friends x attack",
+        "description": "level: 1, 2, 3"
+    },
+    "Otter": {
+        "name": "Otter",
+        "attack": 1,
+        "health": 3,
+        "tier": 1,
+        "ability_class": "sell",
+        "ability": "Give x random friends 1 health",
+        "description": "level: 1, 2, 3"
+    },
+    "Pig": {
+        "name": "Pig",
+        "attack": 4,
+        "health": 1,
+        "tier": 1,
+        "ability_class": "sell",
+        "ability": "Give x coins",
+        "description": "level: 1, 2, 3"
+    },
+    "Snail": {
+        "name": "Snail",
+        "attack": 2,
+        "health": 2,
+        "tier": 2,
+        "ability_class": "end turn",
+        "ability": "Give x health to friends if lost",
+        "description": "level: 1, 2, 3"
+    },
+    "Swan": {
+        "name": "Swan",
+        "attack": 1,
+        "health": 2,
+        "tier": 2,
+        "ability_class": "start of turn",
+        "ability": "Give x gold",
+        "description": "level: 1, 2, 3"
+    },
+    "Hedgehog": {
+        "name": "Hedgehog",
+        "attack": 4,
+        "health": 2,
+        "tier": 2,
+        "ability_class": "faint",
+        "ability": "deal x damge to everyone",
+        "description": "level: 2, 4, 6"
     }
 }

@@ -62,3 +62,5 @@ class Shop():
         for _ in range(self.current_reroll_pet_count-len(self.shop_pets)):
             shop_pet = create_random_shop_pet_from_json(self.current_tier)
             self.shop_pets.append(shop_pet)
+    def to_dict(self):
+        return {"shop":self.shop_pets, "current_reroll_pet_count":self.current_reroll_pet_count, "current_reroll_food_count":self.current_reroll_food_count, "current_tier":self.current_tier}
